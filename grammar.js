@@ -102,9 +102,13 @@ module.exports = grammar({
     if_block: $ => seq(
       $.if_open,
       repeat($._node),
-      optional(seq($.else_directive, repeat($._node))),
+      optional($.else_branch),
       $.if_close,
     ),
+    // The else half is its own node so indentation can treat it as a block
+    // of its own. Without it there is nothing for a query to hang an indent
+    // range on, and {%else} cannot be pulled back to the block's own level.
+    else_branch: $ => seq($.else_directive, repeat($._node)),
     if_open: $ => seq("{%if", optional($.expression_value), "}"),
     else_directive: _ => "{%else}",
     if_close: _ => "{/if}",

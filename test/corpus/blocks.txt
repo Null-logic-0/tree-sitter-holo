@@ -18,13 +18,14 @@ If block with else
       (text)
       (end_tag
         (tag_name)))
-    (else_directive)
-    (element
-      (start_tag
-        (tag_name))
-      (text)
-      (end_tag
-        (tag_name)))
+    (else_branch
+      (else_directive)
+      (element
+        (start_tag
+          (tag_name))
+        (text)
+        (end_tag
+          (tag_name))))
     (if_close)))
 
 ================================================================================

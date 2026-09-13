@@ -376,20 +376,8 @@
           "type": "CHOICE",
           "members": [
             {
-              "type": "SEQ",
-              "members": [
-                {
-                  "type": "SYMBOL",
-                  "name": "else_directive"
-                },
-                {
-                  "type": "REPEAT",
-                  "content": {
-                    "type": "SYMBOL",
-                    "name": "_node"
-                  }
-                }
-              ]
+              "type": "SYMBOL",
+              "name": "else_branch"
             },
             {
               "type": "BLANK"
@@ -399,6 +387,22 @@
         {
           "type": "SYMBOL",
           "name": "if_close"
+        }
+      ]
+    },
+    "else_branch": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "else_directive"
+        },
+        {
+          "type": "REPEAT",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_node"
+          }
         }
       ]
     },
