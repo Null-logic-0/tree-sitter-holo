@@ -23,9 +23,7 @@ module.exports = grammar({
   extras: $ => [/\s+/],
 
   rules: {
-    // ---------------------------------------------------------------
     // Document structure
-    // ---------------------------------------------------------------
     document: $ => repeat($._node),
 
     _node: $ => choice(
@@ -49,8 +47,7 @@ module.exports = grammar({
       ">",
     ),
 
-    // <!-- ... --> Hologram still evaluates {expressions} inside comments,
-    // so comments are a sequence of chunks, not one opaque token.
+    // comments are a sequence of chunks, not one opaque token.
     comment: $ => seq(
       "<!--",
       repeat(choice($.expression, $.escape_sequence, $.comment_text)),
