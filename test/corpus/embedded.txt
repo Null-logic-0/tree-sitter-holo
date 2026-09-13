@@ -1,0 +1,106 @@
+================================================================================
+Script element
+================================================================================
+<script>
+  console.log("hi");
+</script>
+--------------------------------------------------------------------------------
+
+(document
+  (script_element
+    (start_tag
+      (tag_name))
+    (embedded_text)
+    (end_tag
+      (tag_name))))
+
+================================================================================
+Script with attributes
+================================================================================
+<script type="module" defer>
+  export const a = 1;
+</script>
+--------------------------------------------------------------------------------
+
+(document
+  (script_element
+    (start_tag
+      (tag_name)
+      (attribute
+        (attribute_name)
+        (quoted_attribute_value
+          (attribute_text)))
+      (attribute
+        (attribute_name)))
+    (embedded_text)
+    (end_tag
+      (tag_name))))
+
+================================================================================
+Style element
+================================================================================
+<style>
+  .a, .b > .c { color: red }
+</style>
+--------------------------------------------------------------------------------
+
+(document
+  (style_element
+    (start_tag
+      (tag_name))
+    (embedded_text)
+    (expression
+      (expression_value))
+    (end_tag
+      (tag_name))))
+
+================================================================================
+Hologram still evaluates expressions inside script
+================================================================================
+<script>
+  const name = "{@name}";
+</script>
+--------------------------------------------------------------------------------
+
+(document
+  (script_element
+    (start_tag
+      (tag_name))
+    (embedded_text)
+    (expression
+      (expression_value))
+    (embedded_text)
+    (end_tag
+      (tag_name))))
+
+================================================================================
+A tag name that only starts with script is an ordinary element
+================================================================================
+<scripts></scripts>
+--------------------------------------------------------------------------------
+
+(document
+  (element
+    (start_tag
+      (tag_name))
+    (end_tag
+      (tag_name))))
+
+================================================================================
+Empty script and style
+================================================================================
+<script></script>
+<style></style>
+--------------------------------------------------------------------------------
+
+(document
+  (script_element
+    (start_tag
+      (tag_name))
+    (end_tag
+      (tag_name)))
+  (style_element
+    (start_tag
+      (tag_name))
+    (end_tag
+      (tag_name))))

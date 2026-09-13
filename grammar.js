@@ -31,8 +31,13 @@ module.exports = grammar({
     _node: $ => choice(
       $.doctype,
       $.comment,
+      $.script_element,
+      $.style_element,
       $.element,
       $.void_element,
+      $.if_block,
+      $.for_block,
+      $.raw_block,
       $.expression,
       $.escape_sequence,
       $.text,
@@ -86,6 +91,61 @@ module.exports = grammar({
 
     // <{@heading_tag}> ... </{@heading_tag}>
     dynamic_tag_name: $ => $.expression,
+
+    // ---------------------------------------------------------------
+    // Control-flow blocks
+    // ---------------------------------------------------------------
+    // Token spellings come straight from Hologram.Template.Tokenizer:
+    // "{%if" and "{%for" are open-ended, the rest are complete tokens.
+
+    // {%if @a > 1} ... {%else} ... {/if}
+    if_block: $ => seq(
+      $.if_open,
+      repeat($._node),
+      optional(seq($.else_directive, repeat($._node))),
+      $.if_close,
+    ),
+    if_open: $ => seq("{%if", optional($.expression_value), "}"),
+    else_directive: _ => "{%else}",
+    if_close: _ => "{/if}",
+
+    // {%for item <- @items} ... {/for}
+    for_block: $ => seq($.for_open, repeat($._node), $.for_close),
+    for_open: $ => seq("{%for", optional($.expression_value), "}"),
+    for_close: _ => "{/for}",
+
+    // {%raw} ... {/raw}: Hologram stops evaluating expressions here, so the
+    // body is deliberately opaque. Markup inside is not broken into nodes.
+    raw_block: $ => seq($.raw_open, repeat($.raw_text), $.raw_close),
+    raw_open: _ => "{%raw}",
+    raw_close: _ => "{/raw}",
+    // A run of non-brace characters, or a single brace. "{/raw}" is six
+    // characters, so the longest-match rule always prefers it over "{".
+    raw_text: _ => token(prec(-1, choice(/[^{]+/, /\{/))),
+
+    // ---------------------------------------------------------------
+    // <script> and <style>
+    // ---------------------------------------------------------------
+    // Their bodies are raw text to the HTML parser, but Hologram still
+    // evaluates {expressions} inside them, so the body is a mix of both.
+    script_element: $ => seq(
+      alias($._script_start_tag, $.start_tag),
+      repeat(choice($.expression, $.embedded_text)),
+      alias($._script_end_tag, $.end_tag),
+    ),
+    style_element: $ => seq(
+      alias($._style_start_tag, $.start_tag),
+      repeat(choice($.expression, $.embedded_text)),
+      alias($._style_end_tag, $.end_tag),
+    ),
+
+    _script_start_tag: $ => seq("<", alias("script", $.tag_name), repeat($._attribute_like), ">"),
+    _script_end_tag: $ => seq("</", alias("script", $.tag_name), ">"),
+    _style_start_tag: $ => seq("<", alias("style", $.tag_name), repeat($._attribute_like), ">"),
+    _style_end_tag: $ => seq("</", alias("style", $.tag_name), ">"),
+
+    // Stops at "<" so the end tag wins, and at "{" so expressions are seen.
+    embedded_text: _ => token(prec(-1, choice(/[^<{]+/, /</))),
 
     // ---------------------------------------------------------------
     // Attributes

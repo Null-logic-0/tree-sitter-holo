@@ -1,0 +1,179 @@
+================================================================================
+If block with else
+================================================================================
+{%if @count > 10}
+  <p>many</p>
+{%else}
+  <p>few</p>
+{/if}
+--------------------------------------------------------------------------------
+
+(document
+  (if_block
+    (if_open
+      (expression_value))
+    (element
+      (start_tag
+        (tag_name))
+      (text)
+      (end_tag
+        (tag_name)))
+    (else_directive)
+    (element
+      (start_tag
+        (tag_name))
+      (text)
+      (end_tag
+        (tag_name)))
+    (if_close)))
+
+================================================================================
+If block without else
+================================================================================
+{%if @visible?}<span>x</span>{/if}
+--------------------------------------------------------------------------------
+
+(document
+  (if_block
+    (if_open
+      (expression_value))
+    (element
+      (start_tag
+        (tag_name))
+      (text)
+      (end_tag
+        (tag_name)))
+    (if_close)))
+
+================================================================================
+For block
+================================================================================
+{%for item <- @items}
+  <li>{item.name}</li>
+{/for}
+--------------------------------------------------------------------------------
+
+(document
+  (for_block
+    (for_open
+      (expression_value))
+    (element
+      (start_tag
+        (tag_name))
+      (expression
+        (expression_value))
+      (end_tag
+        (tag_name)))
+    (for_close)))
+
+================================================================================
+Nested blocks
+================================================================================
+{%for row <- @rows}
+  {%if row.visible?}
+    <td>{row.label}</td>
+  {/if}
+{/for}
+--------------------------------------------------------------------------------
+
+(document
+  (for_block
+    (for_open
+      (expression_value))
+    (if_block
+      (if_open
+        (expression_value))
+      (element
+        (start_tag
+          (tag_name))
+        (expression
+          (expression_value))
+        (end_tag
+          (tag_name)))
+      (if_close))
+    (for_close)))
+
+================================================================================
+Block conditions may contain braces and strings
+================================================================================
+{%if @map == %{a: 1}}x{/if}
+{%for {k, v} <- @pairs}{k}{/for}
+--------------------------------------------------------------------------------
+
+(document
+  (if_block
+    (if_open
+      (expression_value))
+    (text)
+    (if_close))
+  (for_block
+    (for_open
+      (expression_value))
+    (expression
+      (expression_value))
+    (for_close)))
+
+================================================================================
+Blocks inside an element
+================================================================================
+<ul>
+  {%for i <- @is}
+    <li>{i}</li>
+  {/for}
+</ul>
+--------------------------------------------------------------------------------
+
+(document
+  (element
+    (start_tag
+      (tag_name))
+    (for_block
+      (for_open
+        (expression_value))
+      (element
+        (start_tag
+          (tag_name))
+        (expression
+          (expression_value))
+        (end_tag
+          (tag_name)))
+      (for_close))
+    (end_tag
+      (tag_name))))
+
+================================================================================
+Raw block keeps braces and markup literal
+================================================================================
+{%raw}
+  literal {@x} and <div> stay put
+{/raw}
+--------------------------------------------------------------------------------
+
+(document
+  (raw_block
+    (raw_open)
+    (raw_text)
+    (raw_text)
+    (raw_text)
+    (raw_close)))
+
+================================================================================
+Empty raw block
+================================================================================
+{%raw}{/raw}
+--------------------------------------------------------------------------------
+
+(document
+  (raw_block
+    (raw_open)
+    (raw_close)))
+
+================================================================================
+An expression that merely starts with a percent sign is not a block
+================================================================================
+{%{a: 1}}
+--------------------------------------------------------------------------------
+
+(document
+  (expression
+    (expression_value)))
