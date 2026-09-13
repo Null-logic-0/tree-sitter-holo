@@ -61,9 +61,7 @@ module.exports = grammar({
     // never swallow "-->" because the lexer prefers the longer literal.
     comment_text: $ => token(choice(/[^-{\\]+/, /-/)),
 
-    // ---------------------------------------------------------------
     // Elements
-    // ---------------------------------------------------------------
     element: $ => choice(
       seq($.start_tag, repeat($._node), $.end_tag),
       $.self_closing_tag,
@@ -92,12 +90,9 @@ module.exports = grammar({
     // <{@heading_tag}> ... </{@heading_tag}>
     dynamic_tag_name: $ => $.expression,
 
-    // ---------------------------------------------------------------
     // Control-flow blocks
-    // ---------------------------------------------------------------
     // Token spellings come straight from Hologram.Template.Tokenizer:
     // "{%if" and "{%for" are open-ended, the rest are complete tokens.
-
     // {%if @a > 1} ... {%else} ... {/if}
     if_block: $ => seq(
       $.if_open,
@@ -134,14 +129,36 @@ module.exports = grammar({
     // evaluates {expressions} inside them, so the body is a mix of both.
     script_element: $ => seq(
       alias($._script_start_tag, $.start_tag),
-      repeat(choice($.expression, $.embedded_text)),
+      repeat($._embedded_node),
       alias($._script_end_tag, $.end_tag),
     ),
     style_element: $ => seq(
       alias($._style_start_tag, $.start_tag),
-      repeat(choice($.expression, $.embedded_text)),
+      repeat($._embedded_node),
       alias($._style_end_tag, $.end_tag),
     ),
+
+    // Hologram keeps evaluating blocks inside <script> and <style>. Wrapping
+    // CSS or JS in {%raw} is in fact the idiomatic way to stop braces being
+    // read as expressions. These mirror the ordinary blocks but their bodies
+    // stay script/style text instead of becoming markup, so they are aliased
+    // back to the same node names and queries do not have to know.
+    _embedded_node: $ => choice(
+      alias($._embedded_if_block, $.if_block),
+      alias($._embedded_for_block, $.for_block),
+      $.raw_block,
+      $.expression,
+      $.embedded_text,
+    ),
+
+    _embedded_if_block: $ => seq(
+      $.if_open,
+      repeat($._embedded_node),
+      optional(alias($._embedded_else_branch, $.else_branch)),
+      $.if_close,
+    ),
+    _embedded_else_branch: $ => seq($.else_directive, repeat($._embedded_node)),
+    _embedded_for_block: $ => seq($.for_open, repeat($._embedded_node), $.for_close),
 
     _script_start_tag: $ => seq("<", alias("script", $.tag_name), repeat($._attribute_like), ">"),
     _script_end_tag: $ => seq("</", alias("script", $.tag_name), ">"),
@@ -153,9 +170,7 @@ module.exports = grammar({
     // NOT treat it as an expression here, so JS template literals survive.
     embedded_text: _ => token(prec(-1, choice(/[^<{$]+/, /</, /\$\{/, /\$/))),
 
-    // ---------------------------------------------------------------
     // Attributes
-    // ---------------------------------------------------------------
     _attribute_like: $ => choice($.attribute, $.event_attribute, $.spread),
 
     // class="x"   count={@n}   disabled
@@ -188,12 +203,7 @@ module.exports = grammar({
     ),
     attribute_text: $ => /[^"{\\]+/,
 
-    // ---------------------------------------------------------------
     // Expressions: { elixir code }
-    // ---------------------------------------------------------------
-    // The Elixir code is not parsed here; Zed injects the real Elixir grammar
-    // into expression_value. This grammar only has to find the matching "}",
-    // which means tracking nested braces and braces inside Elixir strings.
     expression: $ => seq("{", optional($.expression_value), "}"),
 
     expression_value: $ => repeat1($._expression_chunk),
@@ -223,15 +233,11 @@ module.exports = grammar({
       "'",
     ),
 
-    // ---------------------------------------------------------------
     // Text
-    // ---------------------------------------------------------------
     // \{  \}  \#  \$  \"  \'  \`  \\   (Hologram.Template.Tokenizer)
     escape_sequence: $ => token(/\\[{}#$"'`\\]/),
 
-    // A run of text trimmed of surrounding whitespace, or a lone backslash
-    // that is not part of an escape. Text may contain ">" and "}" (Hologram
-    // treats a stray "}" as literal) but never "<" or "{".
+    
     text: $ => token(choice(
       /[^<{\\\s]([^<{\\]*[^<{\\\s])?/,
       /\\/,

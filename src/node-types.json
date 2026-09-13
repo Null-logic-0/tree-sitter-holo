@@ -221,6 +221,10 @@
           "named": true
         },
         {
+          "type": "embedded_text",
+          "named": true
+        },
+        {
           "type": "escape_sequence",
           "named": true
         },
@@ -346,6 +350,10 @@
           "named": true
         },
         {
+          "type": "embedded_text",
+          "named": true
+        },
+        {
           "type": "escape_sequence",
           "named": true
         },
@@ -429,6 +437,10 @@
         },
         {
           "type": "else_branch",
+          "named": true
+        },
+        {
+          "type": "embedded_text",
           "named": true
         },
         {
@@ -560,6 +572,18 @@
           "named": true
         },
         {
+          "type": "for_block",
+          "named": true
+        },
+        {
+          "type": "if_block",
+          "named": true
+        },
+        {
+          "type": "raw_block",
+          "named": true
+        },
+        {
           "type": "start_tag",
           "named": true
         }
@@ -669,6 +693,18 @@
         },
         {
           "type": "expression",
+          "named": true
+        },
+        {
+          "type": "for_block",
+          "named": true
+        },
+        {
+          "type": "if_block",
+          "named": true
+        },
+        {
+          "type": "raw_block",
           "named": true
         },
         {

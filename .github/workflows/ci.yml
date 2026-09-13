@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install the tree-sitter CLI
+        run: npm install -g tree-sitter-cli@0.27.0
+
+      # The generated parser is committed, so it must match the grammar.
+      - name: Check that src/ is up to date
+        run: ./scripts/check-generated.sh
+
+      - name: Run the corpus tests
+        run: tree-sitter test
+
+      # A parser that compiles here is a parser Zed can compile.
+      - name: Build the parser
+        run: tree-sitter build

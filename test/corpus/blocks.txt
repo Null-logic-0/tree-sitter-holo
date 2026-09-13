@@ -178,3 +178,18 @@ An expression that merely starts with a percent sign is not a block
 (document
   (expression
     (expression_value)))
+
+================================================================================
+A raw block swallows nested block syntax as literal text
+================================================================================
+{%raw}{%if true}Hologram{/if}{/raw}
+--------------------------------------------------------------------------------
+
+(document
+  (raw_block
+    (raw_open)
+    (raw_text)
+    (raw_text)
+    (raw_text)
+    (raw_text)
+    (raw_close)))

@@ -138,3 +138,78 @@ Braces in CSS are expressions, matching Hologram
       (expression_value))
     (end_tag
       (tag_name))))
+
+================================================================================
+Raw block inside style, the idiomatic way to write CSS with braces
+================================================================================
+<style>
+  {%raw}
+  body { padding: 1px; }
+  {/raw}
+</style>
+--------------------------------------------------------------------------------
+
+(document
+  (style_element
+    (start_tag
+      (tag_name))
+    (raw_block
+      (raw_open)
+      (raw_text)
+      (raw_text)
+      (raw_text)
+      (raw_close))
+    (end_tag
+      (tag_name))))
+
+================================================================================
+If block inside script keeps its body as script text
+================================================================================
+<script>
+{%if @debug?}
+console.log(1);
+{%else}
+console.log(2);
+{/if}
+</script>
+--------------------------------------------------------------------------------
+
+(document
+  (script_element
+    (start_tag
+      (tag_name))
+    (if_block
+      (if_open
+        (expression_value))
+      (embedded_text)
+      (else_branch
+        (else_directive)
+        (embedded_text))
+      (if_close))
+    (end_tag
+      (tag_name))))
+
+================================================================================
+For block inside script
+================================================================================
+<script>
+{%for n <- @ns}
+console.log({n});
+{/for}
+</script>
+--------------------------------------------------------------------------------
+
+(document
+  (script_element
+    (start_tag
+      (tag_name))
+    (for_block
+      (for_open
+        (expression_value))
+      (embedded_text)
+      (expression
+        (expression_value))
+      (embedded_text)
+      (for_close))
+    (end_tag
+      (tag_name))))
