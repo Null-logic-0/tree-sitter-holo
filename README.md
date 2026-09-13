@@ -32,3 +32,11 @@ verified by running them. Two places differ on purpose:
 - **Errors are tolerated.** Hologram raises on a bare `<` in text and on a
   dynamic tag inside a raw block. A grammar cannot raise, so those produce an
   `ERROR` node and parsing continues, which is what an editor needs.
+
+## Licence
+
+Copyright (C) 2026 Luka Tchelidze.
+
+Released under the [GNU General Public License v3.0 or later](LICENSE). This
+program is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY. See the licence for details.

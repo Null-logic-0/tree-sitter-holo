@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "HOLO template grammar for tree-sitter (Hologram framework)",
   "repository": "github:Null-logic-0/tree-sitter-holo",
-  "license": "MIT",
+  "license": "GPL-3.0-or-later",
   "private": true,
   "scripts": {
     "generate": "tree-sitter generate",

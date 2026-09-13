@@ -6,16 +6,21 @@
       "title": "HOLO",
       "scope": "text.html.holo",
       "path": ".",
-      "file-types": ["holo"],
+      "file-types": [
+        "holo"
+      ],
       "injection-regex": "^holo$"
     }
   ],
   "metadata": {
     "version": "0.1.0",
-    "license": "MIT",
+    "license": "GPL-3.0-or-later",
     "description": "HOLO template grammar for tree-sitter (Hologram framework)",
     "authors": [
-      { "name": "Luka Tchelidze", "email": "lukachelidze3008@gmail.com" }
+      {
+        "name": "Luka Tchelidze",
+        "email": "lukachelidze3008@gmail.com"
+      }
     ],
     "links": {
       "repository": "https://github.com/Null-logic-0/tree-sitter-holo"
