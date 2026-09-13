@@ -104,3 +104,37 @@ Empty script and style
       (tag_name))
     (end_tag
       (tag_name))))
+
+================================================================================
+JS template literals are not expressions
+================================================================================
+<script>const t = `${x}` + `a${y}b`;</script>
+--------------------------------------------------------------------------------
+
+(document
+  (script_element
+    (start_tag
+      (tag_name))
+    (embedded_text)
+    (embedded_text)
+    (embedded_text)
+    (embedded_text)
+    (embedded_text)
+    (end_tag
+      (tag_name))))
+
+================================================================================
+Braces in CSS are expressions, matching Hologram
+================================================================================
+<style>.price::after { content: "$" }</style>
+--------------------------------------------------------------------------------
+
+(document
+  (style_element
+    (start_tag
+      (tag_name))
+    (embedded_text)
+    (expression
+      (expression_value))
+    (end_tag
+      (tag_name))))

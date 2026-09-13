@@ -145,7 +145,9 @@ module.exports = grammar({
     _style_end_tag: $ => seq("</", alias("style", $.tag_name), ">"),
 
     // Stops at "<" so the end tag wins, and at "{" so expressions are seen.
-    embedded_text: _ => token(prec(-1, choice(/[^<{]+/, /</))),
+    // "${" is consumed as one two-character token: Hologram deliberately does
+    // NOT treat it as an expression here, so JS template literals survive.
+    embedded_text: _ => token(prec(-1, choice(/[^<{$]+/, /</, /\$\{/, /\$/))),
 
     // ---------------------------------------------------------------
     // Attributes
