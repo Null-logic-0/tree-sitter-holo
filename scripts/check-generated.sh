@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
-# src/parser.c is generated from grammar.js but committed, because editors
-# compile it straight from this repository. That makes a stale parser.c the
-# easiest mistake to make: edit the grammar, forget to regenerate, and the
-# tests pass locally against a parser nobody else will get.
+# src/parser.c is generated but committed, because editors compile it straight
+# from this repo. Fail if it no longer matches grammar.js.
 set -euo pipefail
 tree-sitter generate
 if ! git diff --quiet -- src/; then

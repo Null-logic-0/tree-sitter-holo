@@ -1,10 +1,6 @@
 #!/usr/bin/env bash
-# Parse every template in the Hologram repository itself.
-#
-# The corpus tests check cases we thought of. This checks the ones we did not:
-# it pulls every .holo file and every ~HOLO sigil body out of Hologram's own
-# source and test fixtures and parses them all. It is how the "{%raw} inside
-# <style>" bug was found, which the corpus had no case for.
+# Parse every .holo file and ~HOLO sigil body in the Hologram repository.
+# Catches what the corpus tests do not, because we did not think of it.
 #
 # Usage: ./scripts/check-real-world.sh [path-to-hologram-checkout]
 set -euo pipefail

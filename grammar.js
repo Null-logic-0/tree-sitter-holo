@@ -4,26 +4,13 @@
  * @license GPL-3.0-or-later
  *
  * Copyright (C) 2026 Luka Tchelidze
- *
- * This program is free software: you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the Free
- * Software Foundation, either version 3 of the License, or (at your option)
- * any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <https://www.gnu.org/licenses/>.
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 /// <reference types="tree-sitter-cli/dsl" />
 // @ts-check
 
-// HTML void elements plus Hologram's own tags that never take children.
-// Source: Hologram.Template.Helpers.void_element?/1
+// From Hologram.Template.Helpers.void_element?/1
 const VOID_ELEMENTS = [
   "area", "base", "br", "col", "embed", "hr", "img", "input", "link",
   "meta", "param", "source", "track", "wbr",
@@ -33,8 +20,7 @@ const VOID_ELEMENTS = [
 module.exports = grammar({
   name: "holo",
 
-  // Whitespace between nodes is skipped automatically. It is NOT skipped
-  // inside a token, so text and expression chunks keep their inner spaces.
+  // Skipped between tokens, not inside them, so text keeps its inner spaces.
   extras: $ => [/\s+/],
 
   rules: {
@@ -62,15 +48,15 @@ module.exports = grammar({
       ">",
     ),
 
-    // comments are a sequence of chunks, not one opaque token.
+    // Hologram evaluates expressions inside comments, so this is chunks
+    // rather than one opaque token.
     comment: $ => seq(
       "<!--",
       repeat(choice($.expression, $.escape_sequence, $.comment_text)),
       "-->",
     ),
 
-    // Either a run of "safe" characters or a single dash. A single dash can
-    // never swallow "-->" because the lexer prefers the longer literal.
+    // A lone dash can never swallow "-->": the lexer prefers the longer match.
     comment_text: $ => token(choice(/[^-{\\]+/, /-/)),
 
     // Elements
@@ -79,7 +65,7 @@ module.exports = grammar({
       $.self_closing_tag,
     ),
 
-    // <br>, <input ...>, <slot /> ... : never have children or an end tag.
+    // Never have children or an end tag.
     void_element: $ => seq(
       "<",
       alias(choice(...VOID_ELEMENTS), $.tag_name),
@@ -93,7 +79,7 @@ module.exports = grammar({
 
     _tag_name: $ => choice($.tag_name, $.component_name, $.dynamic_tag_name),
 
-    // <div>, <my-widget>, <svg:path>, <linearGradient>
+    // <div>, <my-widget>, <svg:path>
     tag_name: $ => /[a-z][a-zA-Z0-9_\-.:]*/,
 
     // <Badge>, <MyApp.Components.Card>
@@ -102,43 +88,35 @@ module.exports = grammar({
     // <{@heading_tag}> ... </{@heading_tag}>
     dynamic_tag_name: $ => $.expression,
 
-    // Control-flow blocks
-    // Token spellings come straight from Hologram.Template.Tokenizer:
+    // Control-flow blocks. Token spellings match Hologram.Template.Tokenizer:
     // "{%if" and "{%for" are open-ended, the rest are complete tokens.
-    // {%if @a > 1} ... {%else} ... {/if}
     if_block: $ => seq(
       $.if_open,
       repeat($._node),
       optional($.else_branch),
       $.if_close,
     ),
-    // The else half is its own node so indentation can treat it as a block
-    // of its own. Without it there is nothing for a query to hang an indent
-    // range on, and {%else} cannot be pulled back to the block's own level.
+
+    // Its own node so indents.scm has something to attach a range to.
     else_branch: $ => seq($.else_directive, repeat($._node)),
+
     if_open: $ => seq("{%if", optional($.expression_value), "}"),
     else_directive: _ => "{%else}",
     if_close: _ => "{/if}",
 
-    // {%for item <- @items} ... {/for}
     for_block: $ => seq($.for_open, repeat($._node), $.for_close),
     for_open: $ => seq("{%for", optional($.expression_value), "}"),
     for_close: _ => "{/for}",
 
-    // {%raw} ... {/raw}: Hologram stops evaluating expressions here, so the
-    // body is deliberately opaque. Markup inside is not broken into nodes.
+    // Hologram stops evaluating expressions in here, so the body is opaque.
     raw_block: $ => seq($.raw_open, repeat($.raw_text), $.raw_close),
     raw_open: _ => "{%raw}",
     raw_close: _ => "{/raw}",
-    // A run of non-brace characters, or a single brace. "{/raw}" is six
-    // characters, so the longest-match rule always prefers it over "{".
+
+    // Non-braces, or a single brace. "{/raw}" is longer so it always wins.
     raw_text: _ => token(prec(-1, choice(/[^{]+/, /\{/))),
 
-    // ---------------------------------------------------------------
     // <script> and <style>
-    // ---------------------------------------------------------------
-    // Their bodies are raw text to the HTML parser, but Hologram still
-    // evaluates {expressions} inside them, so the body is a mix of both.
     script_element: $ => seq(
       alias($._script_start_tag, $.start_tag),
       repeat($._embedded_node),
@@ -150,11 +128,9 @@ module.exports = grammar({
       alias($._style_end_tag, $.end_tag),
     ),
 
-    // Hologram keeps evaluating blocks inside <script> and <style>. Wrapping
-    // CSS or JS in {%raw} is in fact the idiomatic way to stop braces being
-    // read as expressions. These mirror the ordinary blocks but their bodies
-    // stay script/style text instead of becoming markup, so they are aliased
-    // back to the same node names and queries do not have to know.
+    // Blocks still work in here, and wrapping CSS or JS in {%raw} is the
+    // usual way to stop braces being read as expressions. Bodies stay
+    // script text; aliased to the normal node names so queries are unaffected.
     _embedded_node: $ => choice(
       alias($._embedded_if_block, $.if_block),
       alias($._embedded_for_block, $.for_block),
@@ -177,9 +153,9 @@ module.exports = grammar({
     _style_start_tag: $ => seq("<", alias("style", $.tag_name), repeat($._attribute_like), ">"),
     _style_end_tag: $ => seq("</", alias("style", $.tag_name), ">"),
 
-    // Stops at "<" so the end tag wins, and at "{" so expressions are seen.
-    // "${" is consumed as one two-character token: Hologram deliberately does
-    // NOT treat it as an expression here, so JS template literals survive.
+    // Stops at "<" so the end tag wins and at "{" so expressions are seen.
+    // "${" is one token: Hologram leaves it literal, so JS template
+    // literals survive.
     embedded_text: _ => token(prec(-1, choice(/[^<{$]+/, /</, /\$\{/, /\$/))),
 
     // Attributes
@@ -191,7 +167,7 @@ module.exports = grammar({
       optional(seq("=", $._attribute_value)),
     ),
 
-    // $click="increment"   $click.stop_propagation="x"   $change.debounce(300)={...}
+    // $click="increment"   $change.debounce(300)={...}
     event_attribute: $ => seq(
       $.event_name,
       optional(seq("=", $._attribute_value)),
@@ -200,8 +176,8 @@ module.exports = grammar({
     // ...{@props}
     spread: $ => seq("...", $.expression),
 
-    // Mirrors Hologram's tokenizer: anything except whitespace and its symbol
-    // characters. May not start with "." so it never competes with "...".
+    // Anything but whitespace and Hologram's symbol characters. Cannot start
+    // with "." so it never competes with "...".
     attribute_name: $ => /[^\s#$%="'`{}<>\/\\.][^\s#$%="'`{}<>\/\\]*/,
     event_name: $ => /\$[^\s#$%="'`{}<>\/\\]+/,
 
@@ -215,11 +191,14 @@ module.exports = grammar({
     ),
     attribute_text: $ => /[^"{\\]+/,
 
-    // Expressions: { elixir code }
+    // Expressions. The Elixir is not parsed here, only balanced: the editor
+    // injects the real Elixir grammar into expression_value.
     expression: $ => seq("{", optional($.expression_value), "}"),
 
     expression_value: $ => repeat1($._expression_chunk),
 
+    // Tracks nested braces and braces inside Elixir strings so the matching
+    // "}" is found.
     _expression_chunk: $ => choice(
       /[^{}"']+/,
       $._elixir_string,
@@ -227,7 +206,7 @@ module.exports = grammar({
       seq("{", repeat($._expression_chunk), "}"),
     ),
 
-    // "text #{interpolation} more"  with \" escapes
+    // "text #{interpolation} more", with \" escapes
     _elixir_string: $ => seq(
       '"',
       repeat(choice(
@@ -245,11 +224,11 @@ module.exports = grammar({
       "'",
     ),
 
-    // Text
-    // \{  \}  \#  \$  \"  \'  \`  \\   (Hologram.Template.Tokenizer)
+    // \{  \}  \#  \$  \"  \'  \`  \\
     escape_sequence: $ => token(/\\[{}#$"'`\\]/),
 
-    
+    // Trimmed of surrounding whitespace. May contain ">" and "}" because
+    // Hologram treats a stray "}" as literal, but never "<" or "{".
     text: $ => token(choice(
       /[^<{\\\s]([^<{\\]*[^<{\\\s])?/,
       /\\/,

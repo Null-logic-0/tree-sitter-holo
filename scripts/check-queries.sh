@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
-# Every Zed query must still match the grammar. Renaming or removing a node
-# in grammar.js silently breaks a query, and Zed only reports it at runtime,
-# so this check belongs in CI next to the corpus tests.
+# Renaming a node breaks any query that names it, and Zed only complains at
+# runtime. Run every query against a sample instead.
 set -uo pipefail
 QUERY_DIR="${1:?usage: check-queries.sh <dir-with-scm-files> [sample.holo]}"
 SAMPLE="${2:-test/samples/kitchen-sink.holo}"

@@ -1,5 +1,4 @@
-# Dependencies and build products. src/ is generated but committed on purpose:
-# Zed compiles src/parser.c straight from the repository.
+# src/ is generated but committed on purpose: editors compile it from here.
 node_modules/
 build/
 target/
