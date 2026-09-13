@@ -1,0 +1,16 @@
+{
+  "name": "tree-sitter-holo",
+  "version": "0.1.0",
+  "description": "HOLO template grammar for tree-sitter (Hologram framework)",
+  "repository": "github:Null-logic-0/tree-sitter-holo",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "generate": "tree-sitter generate",
+    "test": "tree-sitter test",
+    "parse": "tree-sitter parse"
+  },
+  "devDependencies": {
+    "tree-sitter-cli": "^0.27.0"
+  }
+}

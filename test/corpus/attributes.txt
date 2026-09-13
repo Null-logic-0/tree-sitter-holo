@@ -1,0 +1,187 @@
+================================================================================
+Quoted, expression and boolean attributes
+================================================================================
+<a href="/x" title={@title} hidden></a>
+--------------------------------------------------------------------------------
+
+(document
+  (element
+    (start_tag
+      (tag_name)
+      (attribute
+        (attribute_name)
+        (quoted_attribute_value
+          (attribute_text)))
+      (attribute
+        (attribute_name)
+        (expression
+          (expression_value)))
+      (attribute
+        (attribute_name)))
+    (end_tag
+      (tag_name))))
+
+================================================================================
+Quoted value mixing text and expressions
+================================================================================
+<div class="base {@extra} more">x</div>
+--------------------------------------------------------------------------------
+
+(document
+  (element
+    (start_tag
+      (tag_name)
+      (attribute
+        (attribute_name)
+        (quoted_attribute_value
+          (attribute_text)
+          (expression
+            (expression_value))
+          (attribute_text))))
+    (text)
+    (end_tag
+      (tag_name))))
+
+================================================================================
+Attribute names with dashes, colons and dots
+================================================================================
+<div data-role="x" aria-label="y" xml:lang="en" x.y="z"></div>
+--------------------------------------------------------------------------------
+
+(document
+  (element
+    (start_tag
+      (tag_name)
+      (attribute
+        (attribute_name)
+        (quoted_attribute_value
+          (attribute_text)))
+      (attribute
+        (attribute_name)
+        (quoted_attribute_value
+          (attribute_text)))
+      (attribute
+        (attribute_name)
+        (quoted_attribute_value
+          (attribute_text)))
+      (attribute
+        (attribute_name)
+        (quoted_attribute_value
+          (attribute_text))))
+    (end_tag
+      (tag_name))))
+
+================================================================================
+Event attributes in every documented form
+================================================================================
+<button $click="increment">+</button>
+<button $click={:add, amount: 10}>+</button>
+<button $click={action: :reset, params: %{to: 0}}>+</button>
+<button $click.stop_propagation="noop">+</button>
+<input $change="update" $change.debounce(300)="run" />
+<window $key_down.ctrl+k="open" />
+--------------------------------------------------------------------------------
+
+(document
+  (element
+    (start_tag
+      (tag_name)
+      (event_attribute
+        (event_name)
+        (quoted_attribute_value
+          (attribute_text))))
+    (text)
+    (end_tag
+      (tag_name)))
+  (element
+    (start_tag
+      (tag_name)
+      (event_attribute
+        (event_name)
+        (expression
+          (expression_value))))
+    (text)
+    (end_tag
+      (tag_name)))
+  (element
+    (start_tag
+      (tag_name)
+      (event_attribute
+        (event_name)
+        (expression
+          (expression_value))))
+    (text)
+    (end_tag
+      (tag_name)))
+  (element
+    (start_tag
+      (tag_name)
+      (event_attribute
+        (event_name)
+        (quoted_attribute_value
+          (attribute_text))))
+    (text)
+    (end_tag
+      (tag_name)))
+  (void_element
+    (tag_name)
+    (event_attribute
+      (event_name)
+      (quoted_attribute_value
+        (attribute_text)))
+    (event_attribute
+      (event_name)
+      (quoted_attribute_value
+        (attribute_text))))
+  (void_element
+    (tag_name)
+    (event_attribute
+      (event_name)
+      (quoted_attribute_value
+        (attribute_text)))))
+
+================================================================================
+Spread on elements and components
+================================================================================
+<div ...{@attrs}></div>
+<Card ...{@props} title="t" />
+--------------------------------------------------------------------------------
+
+(document
+  (element
+    (start_tag
+      (tag_name)
+      (spread
+        (expression
+          (expression_value))))
+    (end_tag
+      (tag_name)))
+  (element
+    (self_closing_tag
+      (component_name)
+      (spread
+        (expression
+          (expression_value)))
+      (attribute
+        (attribute_name)
+        (quoted_attribute_value
+          (attribute_text))))))
+
+================================================================================
+Escaped brace inside a quoted attribute value
+================================================================================
+<div title="\{not code\}"></div>
+--------------------------------------------------------------------------------
+
+(document
+  (element
+    (start_tag
+      (tag_name)
+      (attribute
+        (attribute_name)
+        (quoted_attribute_value
+          (escape_sequence)
+          (attribute_text)
+          (escape_sequence))))
+    (end_tag
+      (tag_name))))

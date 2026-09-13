@@ -1,0 +1,5 @@
+# Mark generated parser files so GitHub collapses them in diffs.
+src/parser.c linguist-generated -diff
+src/grammar.json linguist-generated -diff
+src/node-types.json linguist-generated -diff
+src/tree_sitter/* linguist-generated
